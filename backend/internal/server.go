@@ -6,6 +6,7 @@ import (
     "net/url"
     "os"
     "strconv"
+    "strings"
 
     "github.com/gin-contrib/cors"
     "github.com/gin-gonic/gin"
@@ -113,7 +114,36 @@ func RunServer() {
         }
         c.JSON(http.StatusNotFound, gin.H{"detail": "Not Found"})
     })
+    r.GET("/api/subcategory", func(c *gin.Context) {
+        main := c.Query("main")
+        sub := c.Query("sub")
 
+        items := make([]gin.H, 0, 200)
+
+        for _, d := range docs {
+            m := d.Meta // map[string]any
+
+            cm, _ := m["categoryMain"].(string)
+            cs, _ := m["categorySub"].(string)
+
+            if strings.TrimSpace(cm) == strings.TrimSpace(main) &&
+                strings.TrimSpace(cs) == strings.TrimSpace(sub) {
+                items = append(items, gin.H{
+                    "id":    d.ID,
+                    "title": d.Title,
+                    "page":  m["page"],
+                    "row":   m["row"],
+                })
+            }
+        }
+
+        c.JSON(200, gin.H{
+            "main":  main,
+            "sub":   sub,
+            "count": len(items),
+            "items": items,
+        })
+    })
     r.GET("/api/kits", func(c *gin.Context) {
         c.JSON(200, gin.H{"kits": kits})
     })

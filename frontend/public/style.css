@@ -36,6 +36,9 @@ body{
   box-shadow:var(--shadow); }
 .title{ display:inline-block; color:var(--blue); text-decoration:none; font-size:18px; font-weight:700; margin-bottom:6px; }
 .title:hover{ text-decoration: underline; }
+.title.no-hover:hover {
+  text-decoration: none;
+}
 .meta{ color:var(--muted); font-size:13px; line-height:1.5; }
 .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
 .small{ color:var(--muted); font-size:14px; }
