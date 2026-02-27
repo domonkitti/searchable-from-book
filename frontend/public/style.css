@@ -40,6 +40,14 @@ body{
   text-decoration: none;
 }
 .meta{ color:var(--muted); font-size:13px; line-height:1.5; }
+.meta {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.3;
+}
+.meta div {
+  margin: 0;
+}
 .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); }
 .small{ color:var(--muted); font-size:14px; }
 

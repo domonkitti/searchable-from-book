@@ -100,6 +100,7 @@ export default function Home() {
           const m = r.meta || {};
           const categoryMain = esc(m.categoryMain || "-");
           const categorySub = esc(m.categorySub || "");
+          const group = esc(m.group || "");          // ✅ เพิ่ม
           const page = esc(m.page || "-");
           const row = esc(m.row || "-");
           const score = esc(r.score);
@@ -112,9 +113,8 @@ export default function Home() {
 
               <div className="meta">
                 <div>หมวด: {categoryMain}</div>
-
                 {!!categorySub.trim() && <div>หมวดย่อย: {categorySub}</div>}
-
+                {!!group.trim() && <div>กลุ่มรายการ: {group}</div>}
                 <div>
                   อ้างอิง: หน้า {page} ลำดับ {row} | score={score}
                 </div>

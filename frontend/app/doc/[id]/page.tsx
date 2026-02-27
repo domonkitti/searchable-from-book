@@ -24,11 +24,10 @@ export default function DocDetailPage() {
   const [doc, setDoc] = useState<Doc | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ---- subcategory expand ----
-  const [subOpen, setSubOpen] = useState(false);
-  const [subLoading, setSubLoading] = useState(false);
-  const [subItems, setSubItems] = useState<any[]>([]);
-  const [subLoadedKey, setSubLoadedKey] = useState<string>(""); // กันโหลดซ้ำ
+  // ---- group expand ----
+  const [groupOpen, setGroupOpen] = useState(false);
+  const [groupLoading, setGroupLoading] = useState(false);
+  const [groupItems, setGroupItems] = useState<any[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -36,46 +35,51 @@ export default function DocDetailPage() {
 
     fetch(`${API}/api/doc/${encodeURIComponent(id)}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setDoc(d))
+      .then((d) => {
+        setDoc(d);
+        // reset group state when doc changes
+        setGroupOpen(false);
+        setGroupItems([]);
+        setGroupLoading(false);
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
   const m = useMemo(() => doc?.meta || {}, [doc]);
 
-  async function toggleSubcategory(main: string, sub: string) {
-    if (!sub) return;
+  const catMain = esc(m.categoryMain || "-");
+  const catSub = esc(m.categorySub || "");
+  const groupName = esc(m.group || "");
 
-    // toggle ปิด
-    if (subOpen) {
-      setSubOpen(false);
+  async function toggleGroup(main: string, sub: string, group: string) {
+    if (!group) return;
+
+    // collapse
+    if (groupOpen) {
+      setGroupOpen(false);
       return;
     }
 
-    // toggle เปิด
-    setSubOpen(true);
+    // expand: load if not loaded
+    setGroupOpen(true);
 
-    // ถ้าเคยโหลดของหมวดย่อยนี้แล้ว ไม่ต้องโหลดซ้ำ
-    const key = `${main}||${sub}`;
-    if (subLoadedKey === key && subItems.length > 0) return;
+    // ถ้าเคยโหลดแล้ว ไม่ต้องยิงซ้ำ
+    if (groupItems.length > 0) return;
 
-    setSubLoading(true);
-    setSubItems([]);
-    setSubLoadedKey(key);
+    setGroupLoading(true);
+    setGroupItems([]);
 
     try {
       const res = await fetch(
-        `${API}/api/subcategory?main=${encodeURIComponent(main)}&sub=${encodeURIComponent(sub)}`,
+        `${API}/api/group?main=${encodeURIComponent(main)}&sub=${encodeURIComponent(sub)}&group=${encodeURIComponent(group)}`,
         { cache: "no-store" }
       );
       const data = await res.json();
-      setSubItems(data.items || []);
+      setGroupItems(data.items || []);
     } finally {
-      setSubLoading(false);
+      setGroupLoading(false);
     }
   }
-
-  const catMain = esc(m.categoryMain || "-");
-  const catSub = esc(m.categorySub || "");
 
   return (
     <main className="wrap">
@@ -97,23 +101,30 @@ export default function DocDetailPage() {
 
         {doc && (
           <>
-            <div className="title no-hover" style={{ marginTop: 10 }}>
+            <div className="title" style={{ marginTop: 10 }}>
               {esc(doc.title)}
             </div>
 
+            {/* หมวด/หมวดย่อย (ไม่คลิก) */}
             <div className="small" style={{ marginTop: 8 }}>
               <div>
                 <b>หมวด:</b> {catMain}
               </div>
 
-              {catSub && (
-                <div style={{ marginTop: 6 }}>
-                  <b>หมวดย่อย:</b> {catSub}{" "}
+              {!!catSub.trim() && (
+                <div style={{ marginTop: 4 }}>
+                  <b>หมวดย่อย:</b> {catSub}
+                </div>
+              )}
 
+              {/* กลุ่มรายการ (กดดูรายการ) */}
+              {!!groupName.trim() && (
+                <div style={{ marginTop: 6 }}>
+                  <b>กลุ่มรายการ:</b> {groupName}{" "}
                   <button
                     type="button"
-                    onClick={() => toggleSubcategory(catMain, catSub)}
-                    aria-expanded={subOpen}
+                    onClick={() => toggleGroup(catMain, catSub, groupName)}
+                    aria-expanded={groupOpen}
                     style={{
                       background: "none",
                       border: "none",
@@ -123,23 +134,23 @@ export default function DocDetailPage() {
                       font: "inherit",
                       fontSize: 13,
                       opacity: 0.7,
-                      color: "#007BFF"
+                      color: "var(--blue)",
                     }}
                   >
-                    {subOpen ? "ซ่อนรายการ ▲" : "ดูรายการ ▼"}
+                    {groupOpen ? "ซ่อนรายการ ▲" : "ดูรายการ ▼"}
                   </button>
 
-                  {subOpen && (
+                  {groupOpen && (
                     <div style={{ marginTop: 8, paddingLeft: 22 }}>
-                      {subLoading && <div className="small">กำลังโหลด…</div>}
+                      {groupLoading && <div className="small">กำลังโหลด…</div>}
 
-                      {!subLoading && subItems.length === 0 && (
-                        <div className="small">ไม่พบรายการในหมวดย่อยนี้</div>
+                      {!groupLoading && groupItems.length === 0 && (
+                        <div className="small">ไม่พบรายการในกลุ่มนี้</div>
                       )}
 
-                      {!subLoading && subItems.length > 0 && (
+                      {!groupLoading && groupItems.length > 0 && (
                         <ul style={{ margin: 0, paddingLeft: 18 }}>
-                          {subItems.map((it: any, idx: number) => (
+                          {groupItems.map((it, idx) => (
                             <li key={it.id ?? idx} style={{ marginTop: 6 }}>
                               <a
                                 href={`/doc/${encodeURIComponent(it.id)}`}
@@ -157,7 +168,7 @@ export default function DocDetailPage() {
               )}
             </div>
 
-            <div className="small" style={{ marginTop: 10 }}>
+            <div className="small" style={{ marginTop: 6 }}>
               <b>อ้างอิง:</b> หน้า {esc(m.page || "-")} ลำดับ {esc(m.row || "-")}
             </div>
 
@@ -167,9 +178,9 @@ export default function DocDetailPage() {
               </div>
             )}
 
-            {!!esc(m.authority).trim() && (
-              <div className="small" style={{ marginTop: 6 }}>
-                <b>อำนาจเขต:</b> {esc(m.authority)}
+            {!!esc(m.emergency).trim() && (
+              <div className="small" style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
+                <b>ครุภัณฑ์ที่ให้ส่วนภูมิภาคเป็นผู้อนุมัติหลักการฯ:</b> {esc(m.emergency)}
               </div>
             )}
 

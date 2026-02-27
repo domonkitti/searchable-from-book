@@ -61,9 +61,9 @@ export default function KitDetailPage() {
 
         {kit && (
           <>
-            <div className="title" style={{ marginTop: 10 }}>
+            <div className="title no-hover" style={{ marginTop: 10, whiteSpace: "pre-wrap" }}>
               {esc(kit.kitName)}
-            </div>
+              </div>
 
             <div className="small" style={{ marginTop: 6 }}>
               <b>อ้างอิง:</b> หน้า {esc(kit.page || "-")}
