@@ -1,0 +1,5 @@
+@import url("/style.css");
+.meta,
+.small {
+  white-space: pre-wrap;
+}
