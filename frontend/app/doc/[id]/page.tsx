@@ -187,7 +187,7 @@ export default function DocDetailPage() {
             {!!esc(m.special).trim() && (
               <div className="card" style={{ marginTop: 12 }}>
                 <div className="small">
-                  <b>เงื่อนไขพิเศษ</b>
+                  <b>หมายเหตุ</b>
                 </div>
                 <div className="small" style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
                   {esc(m.special)}

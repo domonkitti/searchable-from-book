@@ -63,7 +63,7 @@ export default function Home() {
       <Navbar />
 
       <div className="logo">
-        ค้นหา<span>รายการในหนังสือจำแนกเหละมั้ง</span>
+        ค้นหา<span>รายการในหนังสือจำแนก</span>
       </div>
 
       <div className="searchBox">
